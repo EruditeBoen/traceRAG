@@ -1,0 +1,51 @@
+services:
+  api:
+    build: .
+    container_name: tracerag-api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://tracerag:tracerag@db:5432/tracerag
+      REDIS_URL: redis://redis:6379/0
+      APP_ENV: local
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build: .
+    container_name: tracerag-worker
+    command: celery -A app.worker.celery_app.celery_app worker --loglevel=info
+    environment:
+      DATABASE_URL: postgresql+psycopg://tracerag:tracerag@db:5432/tracerag
+      REDIS_URL: redis://redis:6379/0
+      APP_ENV: local
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:16
+    container_name: tracerag-db
+    environment:
+      POSTGRES_USER: tracerag
+      POSTGRES_PASSWORD: tracerag
+      POSTGRES_DB: tracerag
+    ports:
+      - "5432:5432"
+    volumes:
+      - tracerag_postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: tracerag-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  tracerag_postgres_data:
