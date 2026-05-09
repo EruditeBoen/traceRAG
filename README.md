@@ -6,7 +6,7 @@ TraceRAG is a production-style async AI backend skeleton for query processing.
 
 Current vertical slice:
 
-POST /queries -> enqueue Celery job -> worker writes fake answer -> GET /queries/{job_id}
+POST /queryies -> enqueue Celery job -> worker writes fake answer -> GET /queries/{job_id}
 
 ## Stack
 
